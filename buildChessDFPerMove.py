@@ -13,7 +13,6 @@ def buildChessDataframePerMove(df_x : pd.DataFrame, series_y: pd.Series) -> tupl
                  "WhiteAverageDelta", 
                  "BlackAverageDelta"]
 
-    print("I'm new")
     new_data_x = []
 
     new_data_y = []
