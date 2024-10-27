@@ -5,7 +5,8 @@ def buildChessDataframePerMove(df_x : pd.DataFrame, series_y: pd.Series) -> tupl
     '''
     df_x MUST have the following columns: ['whiteElo', 'blackElo', 'StockfishScores', 'StockfishDeltas']
     '''
-    x_columns = ["WhiteElo", 
+    x_columns = ["GameId",
+                 "WhiteElo", 
                  "BlackElo", 
                  "MoveNumber", 
                  "WhiteTurn", 
@@ -19,7 +20,13 @@ def buildChessDataframePerMove(df_x : pd.DataFrame, series_y: pd.Series) -> tupl
 
     a = False
 
-    iteration = 0
+
+    row_number = 0
+
+    # for multiindexing y
+    game_id_list = []
+    move_num_list = []
+
     for index, row in df_x.iterrows():
 
         y_value = series_y[index]
@@ -43,11 +50,13 @@ def buildChessDataframePerMove(df_x : pd.DataFrame, series_y: pd.Series) -> tupl
         for move_number in range(1, len(scores) + 1):
             new_x_row = {}
 
+            new_x_row["GameId"] = index
+
             new_x_row['WhiteElo'] = row['WhiteElo']
             new_x_row['BlackElo'] = row['BlackElo']
             new_x_row['MoveNumber'] = move_number
 
-            new_x_row['WhiteTurn'] = "White" if is_white_turn else "Black"
+            new_x_row['WhiteTurn'] = 1 if is_white_turn else 0
 
             new_x_row['CurrentStockfishScore'] = scores[move_number - 1]
 
@@ -59,13 +68,19 @@ def buildChessDataframePerMove(df_x : pd.DataFrame, series_y: pd.Series) -> tupl
             new_data_x.append(buildOrderedListFromDictionary(new_x_row, x_columns))
             new_data_y.append(y_value)
 
+            game_id_list.append(index)
+            move_num_list.append(move_number)
+
+
             is_white_turn = not is_white_turn # alternate between white and black
         
-        iteration += 1
 
 
     new_df_x = pd.DataFrame(new_data_x, columns = x_columns)
-    new_series_y = pd.Series(data=new_data_y, name=series_y.name)
+    new_df_x.set_index(["GameId"], inplace=True,
+             append=True)
+    
+    new_series_y = pd.Series(new_data_y, index=pd.MultiIndex.from_arrays([game_id_list, move_num_list], names=['Game ID', 'Move Number']))
 
     return new_df_x, new_series_y
 
