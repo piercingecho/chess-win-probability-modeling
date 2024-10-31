@@ -3,12 +3,13 @@ from statistics import fmean
 
 def buildChessDataframePerMove(df_x : pd.DataFrame, series_y: pd.Series) -> tuple[pd.DataFrame, pd.Series]:
     '''
+    Deprecated. Does not include multiindexing.
+
     df_x MUST have the following columns: ['whiteElo', 'blackElo', 'StockfishScores', 'StockfishDeltas']
     '''
-    x_columns = ["GameId",
-                 "MoveNumber", 
-                 "WhiteElo", 
+    x_columns = ["WhiteElo", 
                  "BlackElo", 
+                 "MoveNumber", 
                  "WhiteTurn", 
                  "CurrentStockfishScore", 
                  "WhiteAverageDelta", 
@@ -44,7 +45,6 @@ def buildChessDataframePerMove(df_x : pd.DataFrame, series_y: pd.Series) -> tupl
         for move_number in range(1, len(scores) + 1):
             new_x_row = {}
 
-            new_x_row['GameId'] = index
             new_x_row['WhiteElo'] = row['WhiteElo']
             new_x_row['BlackElo'] = row['BlackElo']
             new_x_row['MoveNumber'] = move_number
@@ -59,7 +59,7 @@ def buildChessDataframePerMove(df_x : pd.DataFrame, series_y: pd.Series) -> tupl
 
 
             new_data_x.append(buildOrderedListFromDictionary(new_x_row, x_columns))
-            new_data_y.append([index, move_number, y_value])
+            new_data_y.append(y_value)
 
             is_white_turn = not is_white_turn # alternate between white and black
         
