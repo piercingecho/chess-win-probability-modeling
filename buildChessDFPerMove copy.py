@@ -3,7 +3,7 @@ from statistics import fmean
 
 def buildChessDataframePerMove(df_x : pd.DataFrame, series_y: pd.Series) -> tuple[pd.DataFrame, pd.Series]:
     '''
-    Deprecated. Does not include multiindexing.
+    Deprecated. Does not include multiindexing for game ID.
 
     df_x MUST have the following columns: ['whiteElo', 'blackElo', 'StockfishScores', 'StockfishDeltas']
     '''

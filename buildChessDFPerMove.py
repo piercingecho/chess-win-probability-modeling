@@ -3,16 +3,26 @@ from statistics import fmean
 
 def buildChessDataframePerMove(df_x : pd.DataFrame, series_y: pd.Series) -> tuple[pd.DataFrame, pd.Series]:
     '''
+    Takes a dataframe where every row represents a chess game, and a series where every value represents whether the corresponding
+    row was a win or loss.
+
+    Outputs a new dataframe and series where every row represents a move in a chess game. Utilizes a multiindex, unique id and GameID, where 
+    the original dataframe's game is referenced.
+
     df_x MUST have the following columns: ['whiteElo', 'blackElo', 'StockfishScores', 'StockfishDeltas']
     '''
     x_columns = ["GameId",
                  "WhiteElo", 
                  "BlackElo", 
+                 "EloDifference",
                  "MoveNumber", 
                  "WhiteTurn", 
                  "CurrentStockfishScore", 
                  "WhiteAverageDelta", 
-                 "BlackAverageDelta"]
+                 "BlackAverageDelta",
+                 "MoveNum*StockfishScore",
+                 "MoveNum*WhiteAvgDelta",
+                 "MoveNum*BlackAvgDelta"]
 
     new_data_x = []
 
@@ -54,14 +64,27 @@ def buildChessDataframePerMove(df_x : pd.DataFrame, series_y: pd.Series) -> tupl
 
             new_x_row['WhiteElo'] = row['WhiteElo']
             new_x_row['BlackElo'] = row['BlackElo']
+            new_x_row['EloDifference'] = row['WhiteElo'] - row['BlackElo']
             new_x_row['MoveNumber'] = move_number
 
             new_x_row['WhiteTurn'] = 1 if is_white_turn else 0
 
-            new_x_row['CurrentStockfishScore'] = scores[move_number - 1]
+            curr_stockfish_score = scores[move_number - 1]
+            new_x_row['CurrentStockfishScore'] = curr_stockfish_score
 
-            new_x_row['WhiteAverageDelta'] = findAverageDelta(deltas, move_number, is_white = True)
-            new_x_row['BlackAverageDelta'] = findAverageDelta(deltas, move_number, is_white = False)
+
+            white_avg_delta = findAverageDelta(deltas, move_number, is_white = True)
+            black_avg_delta = findAverageDelta(deltas, move_number, is_white = False)
+
+            new_x_row['WhiteAverageDelta'] = white_avg_delta
+            new_x_row['BlackAverageDelta'] = black_avg_delta
+
+
+            ### Interaction terms
+
+            new_x_row["MoveNum*StockfishScore"] = move_number * curr_stockfish_score
+            new_x_row["MoveNum*WhiteAvgDelta"] = move_number * white_avg_delta
+            new_x_row["MoveNum*BlackAvgDelta"] = move_number * black_avg_delta
             
 
 
